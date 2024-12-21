@@ -2,12 +2,17 @@ import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import app from './configuration'
-import { getDatabase, ref, onValue } from 'firebase/database'
+import { getDatabase, ref, onValue, push } from 'firebase/database'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
   const [data, setData] = useState([])
+
+  const addBook = (newBook) => {
+    const db = getDatabase(app)
+    const collectionRef = ref(db, 'books')
+    push(collectionRef, newBook)
+  }
 
   useEffect(() => {
     const db = getDatabase(app)
@@ -25,6 +30,31 @@ function App() {
     fetchData()
   }, [])
 
+  const [bookData, setBookData] = useState({
+    author: null,
+    genre: null,
+    publicationYear: null,
+    publisher: null,
+    summary: null,
+    title: null
+  })
+  const handleChange = (e) => {
+    setBookData({
+      ...bookData,
+      [e.target.placeholder]: e.target.value
+    })
+  }
+
+  // Example usage of addBook function
+  const handleAddBook = () => {
+    if (Object.values(bookData).every(value => value === null && value === '')) {
+      alert('Please fill in all fields')
+    } else {
+      alert('Book added successfully')
+      addBook(bookData)
+    }
+  }
+
   console.log(data)
   return (
     <>
@@ -36,14 +66,22 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+        <div>
+          <input type="text" placeholder='author' value={bookData.author} onChange={handleChange} />
+          <br />
+          <input type="text" placeholder='genre' value={bookData.genre} onChange={handleChange} />
+          <br />
+          <input type="number" placeholder='publicationYear' value={bookData.publicationYear} onChange={handleChange} />
+          <br />
+          <input type="text" placeholder='publisher' value={bookData.publisher} onChange={handleChange} />
+          <br />
+          <input type="text" placeholder='summary' value={bookData.summary} onChange={handleChange} />
+          <br />
+          <input type="text" placeholder='title' value={bookData.title} onChange={handleChange} />
+        </div>
+        <br />
+        <button onClick={handleAddBook}>Add New Book</button>
         <div>
           <h1>My books</h1>
           <ul>
